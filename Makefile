@@ -20,5 +20,8 @@ bin/client: obj/client.o
 obj/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+obj/%.o: src/queue/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 clean:
 	rm -f obj/* tmp/* bin/*
