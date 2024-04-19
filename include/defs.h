@@ -1,6 +1,7 @@
 
 #define SERVER "fifo_server"
 #define CLIENT "fifo_client"
+#define WORKER "fifo_worker"
 
 typedef struct msg{
     char program[100];
