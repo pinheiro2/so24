@@ -5,8 +5,10 @@
 #include <fcntl.h>
 #include "defs.h"
 #include <string.h>
+#include <sys/time.h>
 #include "mysystem.h"
 #include "binary-heap.h"
+#include "execPipeline.h"
 
 //FIFO criado pelo servidor
 //Cliente pode receber um sigpipe (concorrência!)
@@ -38,9 +40,16 @@ int isAvailable(int* array, int n){
 	return ret;
 }
 
+long timeElapsed(struct timeval start_time, struct timeval end_time){
+	long milliseconds;
+	milliseconds = (end_time.tv_sec - start_time.tv_sec) * 1000 +
+                   (end_time.tv_usec - start_time.tv_usec) / 1000;
+	return milliseconds;
+}
+
 int main (int argc, char * argv[]){
 
-	int fds, fdc, fdw;
+	int fds, fdc, fdw, fdlog;
 	int taskID = 1;
 	int nworkers = atoi(argv[1]);
 	int available[nworkers];
@@ -81,7 +90,7 @@ int main (int argc, char * argv[]){
 					else{
 						execPipeline(m.program);
 					}
-					printf("Acabei de executar o %s\n^^TASK%d\n", m.program, m.id);
+					gettimeofday(&m.end_time, NULL);
 					close(1);
 					close(2);
 					m.type = 2;
@@ -103,6 +112,7 @@ int main (int argc, char * argv[]){
 		struct msg m;
 		while(read(fds,&m,sizeof(m))>0){
 			if(m.type == 0 || m.type == 1){
+				gettimeofday(&m.start_time, NULL);
 				m.id = taskID;
 				taskID++;
 				char fifoc_name[30];
@@ -147,7 +157,13 @@ int main (int argc, char * argv[]){
 				else{
 					available[m.pid] = 1;
 				}
-				
+
+				char line[30];
+				long realTime = timeElapsed(m.start_time, m.end_time);
+				sprintf(line, "%d %ld\n", m.id, realTime);
+				fdlog = open(LOG, O_CREAT | O_APPEND | O_WRONLY, 0666);
+				write(fdlog, line, strlen(line));
+				close(fdlog);
 			}
 		}
 		close(fds);
