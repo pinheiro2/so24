@@ -75,8 +75,12 @@ int main (int argc, char * argv[]){
 					dup2(fdfile,1);
 					dup2(fdfile,2);
 					close(fdfile);
-
-					mysystem(m.program);
+					if(m.type == 0){
+						mysystem(m.program);
+					}
+					else{
+						execPipeline(m.program);
+					}
 					printf("Acabei de executar o %s\n^^TASK%d\n", m.program, m.id);
 					close(1);
 					close(2);
@@ -98,7 +102,7 @@ int main (int argc, char * argv[]){
 		fds = open(SERVER, O_RDONLY);
 		struct msg m;
 		while(read(fds,&m,sizeof(m))>0){
-			if(m.type == 0){
+			if(m.type == 0 || m.type == 1){
 				m.id = taskID;
 				taskID++;
 				char fifoc_name[30];
