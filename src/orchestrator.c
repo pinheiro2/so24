@@ -68,8 +68,18 @@ int main (int argc, char * argv[]){
 			while(1){
 				fdw = open(fifow_name, O_RDONLY);
 				while(read(fdw, &m, sizeof(m))>0){
+					int fdfile;
+					char file_name[20];
+					sprintf(file_name, "TASK%d.txt", m.id);
+					fdfile = open(file_name, O_CREAT | O_APPEND | O_WRONLY, 0666);
+					dup2(fdfile,1);
+					dup2(fdfile,2);
+					close(fdfile);
+
 					mysystem(m.program);
 					printf("Acabei de executar o %s\n^^TASK%d\n", m.program, m.id);
+					close(1);
+					close(2);
 					m.type = 2;
 					m.pid = i;
 					fds = open(SERVER, O_WRONLY);
