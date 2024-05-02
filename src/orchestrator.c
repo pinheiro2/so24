@@ -98,9 +98,14 @@ void statusCompleted(int fdlog, int fdc){
 
 int main (int argc, char * argv[]){
 
+	if(argc != 3){
+		perror("Wrong number of arguments (./orchestrator output_folder parallel-tasks)");
+		_exit(1);
+	}
+
 	int fds, fdc, fdw, fdlog;
 	int taskID = 1;
-	int nworkers = atoi(argv[1]);
+	int nworkers = atoi(argv[2]);
 	int available[nworkers];
 
 	for(int i = 0; i < nworkers; i++){
@@ -128,7 +133,7 @@ int main (int argc, char * argv[]){
 				while(read(fdw, &m, sizeof(m))>0){
 					int fdfile;
 					char file_name[20];
-					sprintf(file_name, "TASK%d.txt", m.id);
+					sprintf(file_name, "%s/TASK%d.txt", argv[1], m.id);
 					fdfile = open(file_name, O_CREAT | O_APPEND | O_WRONLY, 0666);
 					dup2(fdfile,1);
 					dup2(fdfile,2);
