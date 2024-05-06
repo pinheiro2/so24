@@ -5,7 +5,7 @@
 #define LOG "../tmp/log.txt"
 
 typedef struct msg{
-    char program[100];
+    char program[300];
     int pid;
     int time;
     int id;
